@@ -4,6 +4,7 @@ import api
 import fn
 import sys
 import dumper
+import json
 
 def main(argv):
     config = {}
@@ -22,6 +23,12 @@ def main(argv):
     config = fn.set_config_items(config,argv)
     serverolist = fn.build_server_list(config['host'], config['authtoken'], config['search_string'], config['search_field'], config['prox'])
     serverolist = fn.enrich_server_data(config['host'], config['authtoken'], serverolist, config['prox'])
+
+    #dump here for whack-a-mole
+    for s in serverolist:
+        contents = s.issues['baseline']['details']['targets']#['objects']['contents']
+        print json.dumps(s.issues, sort_keys=True, indent=4)
+
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':
         try:
