@@ -1,3 +1,2 @@
 # Whack-a-Mole
-./repgen.py -a > targets.json
-grep contents targets.json > contents.json
+./repgen.py -a | grep contents > contents.json
