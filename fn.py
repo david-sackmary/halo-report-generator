@@ -54,7 +54,7 @@ def build_server_list(host, authtoken, srch, field, prox):
 def enrich_server_data(host, authtoken, slist, prox):
     returned_dataz = []
     for s in slist:
-        s.issues = get_server_issues(host, authtoken, s.id, prox)
+        s.issues = get_server_fim(host, authtoken, s.id, prox)
         returned_dataz.append(s)
     return(returned_dataz)
 
@@ -74,6 +74,12 @@ def get_server_issues(host,authtoken,node_id,prox):
     queryurl = '/v1/servers/'+str(node_id)+'/issues'
     results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
     return(results)
+
+def get_server_fim(host,authtoken,node_id,prox):
+    queryurl = '/v1/fim_policies/be64cab06fdf0132a4ba3c764e10c221/baselines/cd20d5406fdf0132fe6f3c764e10c220/details'
+    results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
+    return(results)
+
 
 def set_config_items(config,argv):
     try:
