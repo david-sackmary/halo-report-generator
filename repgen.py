@@ -26,8 +26,18 @@ def main(argv):
 
     #dump here for whack-a-mole
     for s in serverolist:
-        contents = s.issues['baseline']['details']['targets']#['objects']['contents']
-        print json.dumps(s.issues, sort_keys=True, indent=4)
+        total_objects = s.issues['baseline']['details']['total_objects']
+        targets = s.issues['baseline']['details']['targets']#['objects']['contents']
+        print json.dumps( targets, sort_keys=True, indent=4)
+                
+        for i in range(total_objects):
+            if targets[i]['number_of_objects'] > 0:
+                json.dumps(targets[i]['number_of_objects'])
+                #print targets[i]['objects']    #This is as as I've gotten to accessing 'contents' without exception.
+               
+                #print json.dumps( targets[i]['objects']['contents'], sort_keys=True, indent=4)
+                #contents = s.issues['baseline']['details']['targets']['objects']['contents']
+                #print json.dumps(contents, sort_keys=True, indent=4)
 
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':
