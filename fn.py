@@ -76,7 +76,9 @@ def get_server_issues(host,authtoken,node_id,prox):
     return(results)
 
 def get_server_fim(host,authtoken,node_id,prox):
-    queryurl = '/v1/fim_policies/be64cab06fdf0132a4ba3c764e10c221/baselines/cd20d5406fdf0132fe6f3c764e10c220/details'
+#    for each baseline...
+#    queryurl = '/v1/fim_policies'     #this gets you the id below, then add /baselines to get the next id below
+    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/fc0227207b640132a87e3c764e10c221/details'
     results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
     return(results)
 
