@@ -35,41 +35,19 @@ def main(argv):
                 print "no objects"
             else:
                 number_of_objects = objects['number_of_objects']
-                print number_of_objects
+#                print number_of_objects
                 if number_of_objects > 0:
                     object = objects['objects']
 #                    print json.dumps(objects['objects'], sort_keys=True, indent=4)
                     for i in range(number_of_objects):
-                        print i
                         if object is None:
                             print "no contents"
                         else:
 #                            print json.dumps(object, sort_keys=True, indent=4)
-                            print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
-
-                    #print object['number_of_objects']
-                    #for j in objects:
-                     #   object = 
-                        #if object is "\"objects\"":
-                         #   print object
-                      #  if object[1] is 'o':
-                       #     print object
-                            #hash = json.dumps( object['contents'], sort_keys=True, indent=4)
-                            #print hash                            
-#        print targets[3]
-#        print json.dumps(targets['objects']['contents'])
-#        print total_objects
-#        break
-#        for i in range(total_objects):
-#            print i
-#           if targets[i]['number_of_objects'] > 0:
-#                print json.dumps(targets[i]['number_of_objects'])
-                #print targets[i]['objects']    #This is as as I've gotten to accessing 'contents' without exception.
-     
-                #print json.dumps( targets[i]['objects']['contents'], sort_keys=True, indent=4)
-                #contents = s.issues['baseline']['details']['targets']['objects']['contents']
-                #print json.dumps(contents, sort_keys=True, indent=4)
-
+                             #print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
+                             hi = object[0]['contents']
+                             if "..." not in hi and "at" not in hi:
+                                 print hi
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':
         try:
