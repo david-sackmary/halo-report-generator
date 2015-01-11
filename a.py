@@ -36,20 +36,18 @@ def main(argv):
             else:
                 number_of_objects = objects['number_of_objects']
                 if number_of_objects > 0:
+                    object = objects['objects']
+                    print json.dumps(objects['objects'], sort_keys=True, indent=4)
+
 #                    print objects['number_of_objects']
-                    for objects in objects:
-                        object = json.dumps( objects, sort_keys=True, indent=4)
-                        #print "hi..........."
-                        print object[0]
-                        print object[1]
-                        print object[2]
-                        print object[3]
-                        print object[4]
-                        if object is "\"objects\"":
+                    for j in objects:
+                        object = json.dumps( j, sort_keys=True, indent=4)
+                        #if object is "\"objects\"":
+                         #   print object
+                        if object[1] is 'o':
                             print object
-                        elif object[1] is 'o':
-                            print "o"
-                            
+                            #hash = json.dumps( object['contents'], sort_keys=True, indent=4)
+                            #print hash                            
 #        print targets[3]
 #        print json.dumps(targets['objects']['contents'])
 #        print total_objects
