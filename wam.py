@@ -45,7 +45,9 @@ def main(argv):
                         else:
 #                            print json.dumps(object, sort_keys=True, indent=4)
                              #print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
-                             hi = object[0]['contents']
+                             
+                             # Print hashes, culling out &hellip and @.
+                             hash = object[0]['contents']
                              if "..." not in hi and "at" not in hi:
                                  print hi
 
