@@ -4,7 +4,7 @@ Whack-A-Mole
 Generate Virus Total reports for FIM Halo modules
 
 ###Dependency:
-+ **Uirusu**    Must git this too:  https://github.com/arxopia/uirusu
++ **Uirusu**   git this too:  https://github.com/arxopia/uirusu
 
 ###Files:
 * **README.md**   The one you're reading now...
