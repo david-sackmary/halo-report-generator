@@ -1,7 +1,7 @@
 # Whack-a-Mole
 
-# Hit Halo API for FIM scan, get hashes and output hashes.txt
-./wam.py  
+# Hit Halo API for FIM scan, get hashes.
+./wam.py -a > hashes.txt
 
 # Hit VirusTotal API
 uirusu -f hashes.txt
