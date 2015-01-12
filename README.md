@@ -13,8 +13,8 @@ Generate Virus Total reports for FIM Halo modules
 * **fn.py**   Misc functions here
 * **license.txt**   The cure for insomnia
 * **outfiles/**   Output files get dropped here
-* **repgen.py**   RUN THIS ONE.  Accepts -s SearchString or -a for all.  Optionally declare another config file with -c
 * **server.py**   Server object definition
+* **wam.py**   RUN THIS ONE.  Accepts -s SearchString or -a for all.  Optionally declare another config file with -c
 
 ###Usage:
 
