@@ -48,8 +48,8 @@ def main(argv):
                              
                              # Print hashes, culling out &hellip and @.
                              hash = object[0]['contents']
-                             if "..." not in hi and "at" not in hi:
-                                 print hi
+                             if "..." not in hash and "at" not in hash:
+                                 print hash
 
 if __name__ == "__main__":
     main(sys.argv[1:])
