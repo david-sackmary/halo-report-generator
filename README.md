@@ -2,7 +2,7 @@ Whack-A-Mole
 =====================
 
 Generate Virus Total reports for FIM Halo modules
-
+NOTE: WAM invokes 'uirusu' an you need to git this to run WAM:  https://github.com/arxopia/uirusu
 ###Files:
 * **README.md**   The one you're reading now...
 * **api.py**   The last stop before crossing the interwebs
