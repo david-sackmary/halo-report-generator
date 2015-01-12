@@ -1,2 +1,8 @@
 # Whack-a-Mole
-./repgen.py -a | grep contents > contents.json
+
+# Hit Halo API for FIM scan, get hashes and output hashes.txt
+./wam.py  
+
+# Hit VirusTotal API
+uirusu -f hashes.txt
+
