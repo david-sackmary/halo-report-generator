@@ -17,11 +17,12 @@ Generate Virus Total reports for FIM Halo modules
 * **license.txt**   The cure for insomnia
 * **outfiles/**   Output files get dropped here
 * **server.py**   Server object definition
-* **wam.py**   RUN THIS ONE.  Accepts -s SearchString or -a for all.  Optionally declare another config file with -c
+* **wam.py**   Accepts -s SearchString or -a for all.  Optionally declare another config file with -c
+* **wam.sh**   RUN THIS ONE.
 
 ###Usage:
 
->wam.py (-s SEARCHPREFIX|-a) [-c CONFIGFILE]
+>wam.sh (-s SEARCHPREFIX|-a) [-c CONFIGFILE]
 
 >This script generates a report for all servers if -a is used, or just the servers with SEARCHPREFIX in the server label if -s is used.
 
