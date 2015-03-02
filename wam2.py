@@ -5,6 +5,7 @@ import fn
 import sys
 import dumper
 import json
+import subprocess
 
 def main(argv):
     config = {}
@@ -25,8 +26,10 @@ def main(argv):
     serverolist = fn.enrich_server_data(config['host'], config['authtoken'], serverolist, config['prox'])
 
     #dump here for whack-a-mole
+    vtfile = open("hashes.txt","w")
+    wamfile = open("wam.txt","w")
+
     for s in serverolist:
-        print s.name
         total_objects = s.issues['baseline']['details']['total_objects']
         targets = s.issues['baseline']['details']['targets']#['objects']['contents']
         #print json.dumps( targets, sort_keys=True, indent=2)
@@ -50,8 +53,12 @@ def main(argv):
                              # Print hashes, culling out &hellip and @.
                              hash = object[0]['contents']
                              if "..." not in hash and "at" not in hash:
-                                 print object[0]['filename']
-                                 print hash
+                                 wamfile.write(str(s.name) + ", " + str(object[0]['filename']) + ", " + str(hash) + "\n")
+                                 vtfile.write(hash + "\n")
+        vtfile.close()
+        wamfile.close()
+        a = subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
+        print a
 
 if __name__ == "__main__":
     main(sys.argv[1:])
