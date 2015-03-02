@@ -56,8 +56,9 @@ def html(objex,prefix,formt,logo_url):
     raw_reports = {}
     tstamp = str(time.strftime("%Y-%m-%d %H:%M"))
     complete_contents = ''
-    sva_contents = ''
     csm_contents = ''
+    fim_contents = ''
+    sva_contents = ''
     head = '''<html><head>
     <meta name="pdfkit-orientation" content="Landscape"/>
     <style>
@@ -79,20 +80,23 @@ def html(objex,prefix,formt,logo_url):
                 '''
     closer = '</body></html>'
     logo = '![Logo](' + logo_url + ')\n'
-    masthead_complete = '#Software Vulnerability and Configuration Compliance Report\n##' + tstamp
-    masthead_sva = '#Software Vulnerability Report\n##' + tstamp
+    masthead_complete = '#Masthead Complete\n##' + tstamp
     masthead_csm = '#Configuration Compliance Report\n##' + tstamp
+    masthead_fim = '#File Integrity Management and VirusTotal Report\n##' + tstamp
+    masthead_sva = '#Software Vulnerability Report\n##' + tstamp
     cve_summary, ncrit_pkg_summary, crit_pkg_summary = cruncher.all_server_stats(objex)
     summary_content = str(generate_summary_content(cve_summary, ncrit_pkg_summary, crit_pkg_summary))
     for s in objex:
-        server, csm, sva = generate_server_content(s)
-        complete_contents = complete_contents + str(str(server) + str(csm) + str(sva))
-        sva_contents = sva_contents + str(str(server) + str(sva))
+        server, csm, fim, sva = generate_server_content(s)
+        complete_contents = complete_contents + str(str(server) + str(csm) + str(fim) + str(sva))
         csm_contents = csm_contents + str(str(server) + str(csm))
+        fim_contents = fim_contents + str(str(server) + str(fim))
+        sva_contents = sva_contents + str(str(server) + str(sva))
     raw_reports['complete'] = str(logo + masthead_complete + str(summary_content) + str(complete_contents))
     raw_reports['sva'] = str(logo + masthead_sva + str(summary_content) + str(sva_contents))
     raw_reports['csm'] =str(logo + masthead_csm + str(csm_contents))
-    for rtype in ['complete', 'sva', 'csm']:
+    raw_reports['fim'] =str(logo + masthead_fim + str(fim_contents))
+    for rtype in ['complete', 'csm', 'fim', 'sva']:
         file_name = prefix + '-' + rtype
         html_content_from_md = markdown.markdown(raw_reports[rtype])
         html_content = str(head) + str(html_content_from_md) + str(closer)
@@ -122,6 +126,7 @@ def generate_summary_content(cve, ncpkg, cpkg):
 def generate_server_content(s):
     mdown_server = ''
     mdown_csm = ''
+    mdown_fim = ''
     mdown_sva = ''
     servername = s.name
     serverid = s.id
@@ -129,13 +134,50 @@ def generate_server_content(s):
     servergroup = s.group_name
     issues = s.issues
     csm_stats = cruncher.get_server_csm_stats(s)
+    fim_stats = cruncher.get_server_fim_stats(s)
     sva_stats = cruncher.get_server_sva_stats(s)
     mdown_server = mdown_server + '\n\n##Host Name: ' + str(servername) + '\n\n###Label: ' + str(serverlabel) + '\n\n###Group: ' + str(s.group_name)
     mdown_csm = mdown_csm + '\n\n###Configuration Compliance Summary:\n* Good: ' + str(csm_stats['good']) + '\n* Bad: ' + str(csm_stats['bad']) + '\n* Indeterminate: ' + str(csm_stats['indeterminate'])
+    mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(csm_stats['bad']) + '\n* Good: ' + str(csm_stats['good']) + '\n* Unknown: ' + str(csm_stats['indeterminate'])
     mdown_sva = mdown_sva + '\n\n###Software Vulnerability Assessment Summary:\n* Critical: ' + str(sva_stats['critical']) + '\n* Non-critical: ' + str(sva_stats['non_critical'])
     mdown_csm = mdown_csm + str(md_render_csm(issues))
+    mdown_csm = mdown_csm + str(md_render_fim(issues))
     mdown_sva = mdown_sva + str(md_render_sva(issues))
-    return(mdown_server, mdown_csm, mdown_sva)
+    return(mdown_server, mdown_csm, mdown_fim, mdown_sva)
+
+def md_render_csm(i):
+    ret_md = ''
+#Gives us json, we give back beautiful text.
+    ret_md = ret_md + "\n\n###Configuration Vulnerabilities:\n\n<table><tr><td>Name</td><td>Type</td><td>Target</td><td>Expected</td><td>Actual</td></tr>"
+    try:
+        for issue in i['sca']['findings']:
+            if issue['status'] == 'bad':
+                iname = issue['rule_name']
+                for entry in issue['details']:
+                    if entry['status'] == 'bad':
+                        ret_md = ret_md + '<tr><td>' + str(iname) + '</td><td>' + str(entry['type']) + '</td><td><p> ' + str(entry['target']) + '</p></td><td><p>' + str(entry['expected']).replace('\|','\\|') + '</p></td><td><p>' + str(entry['actual']).replace('\|','\\|') + '</p></td></tr>'
+        ret_md = ret_md + "</table>\n\n---\n"
+    except:
+        ret_md = ret_md + '<tr><td style="color:red;">NO CONFIGURATION ASSESSMENT RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
+    return(ret_md)
+
+def md_render_fim(i):
+    ret_md = ''
+    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Package</td><td>Version</td><td>Critical</td><td>CVEs</td></tr>"
+    try:
+        for issue in i['fim']['findings']:
+            if issue['status'] == 'bad':
+                cvelist = []
+                for entry in issue['cve_entries']:
+                    if entry['suppressed'] == False:
+                        cvelist.append(entry['cve_entry'])
+                cve_enriched = fn.enrich_cve_list(cvelist)
+                cve_html = fn.cve_e_to_html(cve_enriched)
+                ret_md = ret_md + '<tr><td>' + str(issue['package_name']) + '</td><td>' + str(issue['package_version']) + '</td><td>' + str(issue['critical']) + '</td><td>' + cve_html + '</td></tr>'
+        ret_md = ret_md + "</table>\n\n---\n"
+    except:
+        ret_md = ret_md + '<tr><td style="color:red;">NO SOFTWARE VULNERABILITY RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
+    return(ret_md)
 
 def md_render_sva(i):
     ret_md = ''
@@ -153,22 +195,6 @@ def md_render_sva(i):
         ret_md = ret_md + "</table>\n\n---\n"
     except:
         ret_md = ret_md + '<tr><td style="color:red;">NO SOFTWARE VULNERABILITY RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
-    return(ret_md)
-
-def md_render_csm(i):
-    ret_md = ''
-#Gives us json, we give back beautiful text.
-    ret_md = ret_md + "\n\n###Configuration Vulnerabilities:\n\n<table><tr><td>Name</td><td>Type</td><td>Target</td><td>Expected</td><td>Actual</td></tr>"
-    try:
-        for issue in i['sca']['findings']:
-            if issue['status'] == 'bad':
-                iname = issue['rule_name']
-                for entry in issue['details']:
-                    if entry['status'] == 'bad':
-                        ret_md = ret_md + '<tr><td>' + str(iname) + '</td><td>' + str(entry['type']) + '</td><td><p> ' + str(entry['target']) + '</p></td><td><p>' + str(entry['expected']).replace('\|','\\|') + '</p></td><td><p>' + str(entry['actual']).replace('\|','\\|') + '</p></td></tr>'
-        ret_md = ret_md + "</table>\n\n---\n"
-    except:
-        ret_md = ret_md + '<tr><td style="color:red;">NO CONFIGURATION ASSESSMENT RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)
 
 def print_server_stuff_plain(objex):
