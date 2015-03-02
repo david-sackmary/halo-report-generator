@@ -55,12 +55,25 @@ def main(argv):
                              if "..." not in hash and "at" not in hash:
                                  wamfile.write(str(s.name) + ", " + str(object[0]['filename']) + ", " + str(hash) + "\n")
                                  vtfile.write(hash + "\n")
-        vtfile.close()
-        wamfile.close()
+        vtfile.close() #input to VirusTotal
+        wamfile.close()#same as vtfile pluse extra data needed for WAM report
+
 #this call works.
 #        a = subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
 #        print a
         a = subprocess.Popen("uirusu -f hashes.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
         print a
+
+        #HERE we need to put the contents of 'wamfile' and 'a' and put into 'serverolist'
+
+# Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
+    if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':
+        try:
+            config['logo_url'] = fn.where_is_img(config['logo_url'])[1]
+        except:
+# Here we empty that field in case the data was bad...
+            config['logo_url'] = ''
+    fn.handle_output(config, serverolist)
+
 if __name__ == "__main__":
     main(sys.argv[1:])
