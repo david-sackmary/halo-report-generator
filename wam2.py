@@ -57,8 +57,10 @@ def main(argv):
                                  vtfile.write(hash + "\n")
         vtfile.close()
         wamfile.close()
-        a = subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
+#this call works.
+#        a = subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
+#        print a
+        a = subprocess.Popen("uirusu -f hashes.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
         print a
-
 if __name__ == "__main__":
     main(sys.argv[1:])
