@@ -58,13 +58,13 @@ def main(argv):
         vtfile.close() #input to VirusTotal
         wamfile.close()#same as vtfile pluse extra data needed for WAM report
 
-#this call works.
-#        a = subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
-#        print a
-        a = subprocess.Popen("uirusu -f hashes.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
-        print a
-
         #HERE we need to put the contents of 'wamfile' and 'a' and put into 'serverolist'
+        # ...but instead I'm writing out to files, then reading them again inside 'handle_output'
+        #TO DO this right, use the call below. put output 'a' into serverolist somehow.
+        # a = subprocess.Popen("uirusu -f hashes.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
+        # print a
+
+        subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
 
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':
