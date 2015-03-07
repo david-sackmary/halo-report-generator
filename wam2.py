@@ -69,7 +69,7 @@ def main(argv):
         #save the 'resource' field to get results later
         host = "www.virustotal.com"
         selector = "https://www.virustotal.com/vtapi/v2/file/scan"
-        fields = [("apikey", "bbcbdebbe6503a2efb02553ffc4a07d9f0d338ae314c70b3556ad0573221545c")]
+        fields = [("apikey", "put-your-virustotal-key-here")]
         file_to_send = open("hashes" + str(filenum) + ".txt", "rb").read()
         files = [("file", "hashes" + str(filenum) + ".txt", file_to_send)]
         vt_out = postfile.post_multipart(host, selector, fields, files)
