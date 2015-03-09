@@ -30,7 +30,7 @@ def main(argv):
     filenum = 0
     for s in serverolist:
         #for each server, create a file of hashes to send to VirusTotal
-        # and create a files of filename/hashes for our report.
+        # and create a file of filename/hashes for our report.
         vtfile = open("hashes" + str(filenum) + ".txt","w")
         wamfile = open("wam" + str(filenum) + ".txt","w")
         #filenum increments at bottom of loop
@@ -63,13 +63,13 @@ def main(argv):
                                  vtfile.write(hash + "\n")
 
         vtfile.close() #input to VirusTotal
-        wamfile.close()#same as vtfile pluse extra data needed for WAM report
+        wamfile.close()#same as vtfile plus extra data needed for WAM report
 
         #send the file of hashes for this server to VirusTotal. 
         #save the 'resource' field to get results later
         host = "www.virustotal.com"
         selector = "https://www.virustotal.com/vtapi/v2/file/scan"
-        fields = [("apikey", "bbcbdebbe6503a2efb02553ffc4a07d9f0d338ae314c70b3556ad0573221545c")]
+        fields = [("apikey", config['virus_total_key'])]
         file_to_send = open("hashes" + str(filenum) + ".txt", "rb").read()
         files = [("file", "hashes" + str(filenum) + ".txt", file_to_send)]
         vt_out = postfile.post_multipart(host, selector, fields, files)
