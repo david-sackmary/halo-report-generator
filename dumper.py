@@ -96,6 +96,7 @@ def html(objex,prefix,formt,logo_url):
     raw_reports['sva'] = str(logo + masthead_sva + str(summary_content) + str(sva_contents))
     raw_reports['csm'] =str(logo + masthead_csm + str(csm_contents))
     raw_reports['fim'] =str(logo + masthead_fim + str(fim_contents))
+
     for rtype in ['complete', 'csm', 'fim', 'sva']:
         file_name = prefix + '-' + rtype
         html_content_from_md = markdown.markdown(raw_reports[rtype])
@@ -138,7 +139,7 @@ def generate_server_content(s):
     sva_stats = cruncher.get_server_sva_stats(s)
     mdown_server = mdown_server + '\n\n##Host Name: ' + str(servername) + '\n\n###Label: ' + str(serverlabel) + '\n\n###Group: ' + str(s.group_name)
     mdown_csm = mdown_csm + '\n\n###Configuration Compliance Summary:\n* Good: ' + str(csm_stats['good']) + '\n* Bad: ' + str(csm_stats['bad']) + '\n* Indeterminate: ' + str(csm_stats['indeterminate'])
-    mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(csm_stats['bad']) + '\n* Good: ' + str(csm_stats['good']) + '\n* Unknown: ' + str(csm_stats['indeterminate'])
+    mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(fim_stats['known_virus']) + '\n* Good: ' + str(fim_stats['known_safe']) + '\n* Unknown: ' + str(fim_stats['unknown'])
     mdown_sva = mdown_sva + '\n\n###Software Vulnerability Assessment Summary:\n* Critical: ' + str(sva_stats['critical']) + '\n* Non-critical: ' + str(sva_stats['non_critical'])
     mdown_csm = mdown_csm + str(md_render_csm(issues))
     mdown_csm = mdown_csm + str(md_render_fim(issues))
@@ -163,7 +164,9 @@ def md_render_csm(i):
 
 def md_render_fim(i):
     ret_md = ''
-    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Package</td><td>Version</td><td>Critical</td><td>CVEs</td></tr>"
+    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>Target</td><td>Hash</td><td>VirusTotal</td></tr>"
+
+#open file here and fill in values for the tables
     try:
         for issue in i['fim']['findings']:
             if issue['status'] == 'bad':
@@ -176,7 +179,7 @@ def md_render_fim(i):
                 ret_md = ret_md + '<tr><td>' + str(issue['package_name']) + '</td><td>' + str(issue['package_version']) + '</td><td>' + str(issue['critical']) + '</td><td>' + cve_html + '</td></tr>'
         ret_md = ret_md + "</table>\n\n---\n"
     except:
-        ret_md = ret_md + '<tr><td style="color:red;">NO SOFTWARE VULNERABILITY RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
+        ret_md = ret_md + '<tr><td style="color:red;">NO VIRUS TOTAL RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)
 
 def md_render_sva(i):
