@@ -48,17 +48,18 @@ def get_server_fim_stats(server):
     data = urllib.urlencode(parameters)
     req = urllib2.Request(url, data)
     response = urllib2.urlopen(req)
-    json = response.read()
-    print json
+    jsona = response.read()
+    response_dict = json.loads(jsona)
+    print response_dict['total']
+    print response_dict['positives']
     print server.name
     print server.resource
 
-
-    virus = 1
-    safe = 1
+    infected = response_dict['positives']
+    safe = response_dict['total'] - response_dict['positives']
     unknown = 1
 
-    retval = {'known_virus':virus, 
+    retval = {'known_virus':infected, 
               'known_safe':safe,
               'unknown':unknown}
     return(retval)
