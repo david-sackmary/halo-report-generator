@@ -50,11 +50,12 @@ def get_server_fim_stats(server):
     response = urllib2.urlopen(req)
     jsona = response.read()
     response_dict = json.loads(jsona)
+    print response_dict
     print response_dict['total']
     print response_dict['positives']
     print server.name
     print server.resource
-
+#### NOTE - this scan might be only for the 1st hash?  or all hashes for that server?  figure this out@@@
     infected = response_dict['positives']
     safe = response_dict['total'] - response_dict['positives']
     unknown = 1
