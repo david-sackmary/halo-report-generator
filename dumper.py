@@ -142,7 +142,7 @@ def generate_server_content(s):
     mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(fim_stats['known_virus']) + '\n* Good: ' + str(fim_stats['known_safe']) + '\n* Unknown: ' + str(fim_stats['unknown'])
     mdown_sva = mdown_sva + '\n\n###Software Vulnerability Assessment Summary:\n* Critical: ' + str(sva_stats['critical']) + '\n* Non-critical: ' + str(sva_stats['non_critical'])
     mdown_csm = mdown_csm + str(md_render_csm(issues))
-    mdown_csm = mdown_csm + str(md_render_fim(issues))
+    mdown_fim = mdown_fim + str(md_render_fim(issues))
     mdown_sva = mdown_sva + str(md_render_sva(issues))
     return(mdown_server, mdown_csm, mdown_fim, mdown_sva)
 
@@ -166,7 +166,9 @@ def md_render_fim(i):
     ret_md = ''
     ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>File</td><td>Hash</td><td>Infection</td></tr>"
 
+#DAVE KNOWS
 #open file here and fill in values for the tables
+#or maybe values were filled in by get_server_fim_stats
     try:
         for issue in i['fim']['findings']:
             if issue['status'] == 'bad':
