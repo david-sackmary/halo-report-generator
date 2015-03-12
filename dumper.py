@@ -164,7 +164,7 @@ def md_render_csm(i):
 
 def md_render_fim(i):
     ret_md = ''
-    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>Target</td><td>Hash</td><td>VirusTotal</td></tr>"
+    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>File</td><td>Hash</td><td>Infection</td></tr>"
 
 #open file here and fill in values for the tables
     try:
