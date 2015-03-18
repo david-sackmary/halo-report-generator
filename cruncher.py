@@ -49,16 +49,30 @@ def get_server_fim_stats(server):
     req = urllib2.Request(url, data)
     response = urllib2.urlopen(req)
     jsona = response.read()
-    response_dict = json.loads(jsona)
-    print response_dict
-    print response_dict['total']
-    print response_dict['positives']
-    print server.name
-    print server.resource
+    vt = json.loads(jsona)
+    if vt['response_code'] <> 1:
+      print "ERROR - Virus Total API returned bad response_code"
+
+#    print server.name
+#    print server.resource
+    print json.dumps(vt, indent = 2)
+#    print vt['scans']
+    print vt['response_code']
+    print vt['positives']
+    server.infected = []
+    try:
+       if vt['positives'] > 0:
+           infected = infected + 1
+           server.infected.append( vt['resource'] )
+       else:
+           unknown = unknown + 1 #how to tell safe from unknown?
+    except:
+           print("error in cruncher.get_server_fim_stats")
+    print server.infected
 #### NOTE - this scan might be only for the 1st hash?  or all hashes for that server?  figure this out@@@
-    infected = response_dict['positives']
-    safe = response_dict['total'] - response_dict['positives']
-    unknown = 1
+    infected = vt['positives']
+    safe = vt['total'] - vt['positives']
+    unknown = 1  #not sure how to set this field
 
     retval = {'known_virus':infected, 
               'known_safe':safe,

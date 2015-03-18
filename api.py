@@ -1,8 +1,6 @@
 #!/usr/bin/python
 #
-# DON'T FORGET TO SET THE API KEY/SECRET.
-
-
+# DON'T FORGET TO SET THE API KEY/SECRET in config.conf
 
 import urllib
 import httplib
@@ -67,4 +65,3 @@ def get_auth_token(host,clientid,clientsecret,prox):
     key = data['access_token']
     connection.close()
     return key
-

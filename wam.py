@@ -33,6 +33,10 @@ def main(argv):
         # and create a file of filename/hashes for our report.
         vtfile = open("hashes" + str(filenum) + ".txt","w")
         wamfile = open("wam" + str(filenum) + ".txt","w")
+
+        #for each server, create a dictionary of filenames and  hashes to send to VirusTotal (up to 25 maximum)
+        s.vt = {}
+
         #filenum increments at bottom of loop
 
         #Drill down through the JSON to get to the hashes, if they exist
@@ -61,6 +65,10 @@ def main(argv):
                              if "..." not in hash and "at" not in hash:
                                  wamfile.write(str(s.name) + ", " + str(object[0]['filename']) + ", " + str(hash) + "\n")
                                  vtfile.write(hash + "\n")
+#                                 file = str(object[0]['filename'])
+#                                 s.vt.update( { file : str(hash) } ) #match filenames to hashes
+                                 s.vt.update( { str(object[0]['filename']) : str(hash) } ) #match filenames to hashes
+        print s.vt
 
         vtfile.close() #input to VirusTotal
         wamfile.close()#same as vtfile plus extra data needed for WAM report

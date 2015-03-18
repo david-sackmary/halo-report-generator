@@ -181,7 +181,7 @@ def md_render_fim(i):
                 ret_md = ret_md + '<tr><td>' + str(issue['package_name']) + '</td><td>' + str(issue['package_version']) + '</td><td>' + str(issue['critical']) + '</td><td>' + cve_html + '</td></tr>'
         ret_md = ret_md + "</table>\n\n---\n"
     except:
-        ret_md = ret_md + '<tr><td style="color:red;">NO VIRUS TOTAL RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
+        ret_md = ret_md + '<tr><td style="color:red;">NO INFECTIONS FOUND</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)
 
 def md_render_sva(i):

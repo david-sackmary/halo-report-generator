@@ -33,6 +33,7 @@ def main(argv):
         # and create a file of filename/hashes for our report.
         vtfile = open("hashes" + str(filenum) + ".txt","w")
         wamfile = open("wam" + str(filenum) + ".txt","w")
+
         #filenum increments at bottom of loop
 
         #Drill down through the JSON to get to the hashes, if they exist
@@ -61,7 +62,6 @@ def main(argv):
                              if "..." not in hash and "at" not in hash:
                                  wamfile.write(str(s.name) + ", " + str(object[0]['filename']) + ", " + str(hash) + "\n")
                                  vtfile.write(hash + "\n")
-
         vtfile.close() #input to VirusTotal
         wamfile.close()#same as vtfile plus extra data needed for WAM report
 
