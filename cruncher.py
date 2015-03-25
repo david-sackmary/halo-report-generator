@@ -4,6 +4,7 @@ import csv  # remove later
 import json
 import urllib
 import urllib2
+import requests
 
 from operator import itemgetter
 from collections import OrderedDict
@@ -36,42 +37,39 @@ def get_server_fim_stats(server):
     virus = 0
     safe = 0
     unknown = 0
+    config = {}
+    server.infected = []
+    server.positives = 0
 
     #wamfile = open("wam.txt","w")
-    #vtfile = open("vt.txt","w")
     #server_list = list(csv.reader(open("wam.txt", 'rb'), delimiter=', ', skipinitialspace=True))
-    #vt_list = list(csv.reader(open("vt.txt", 'rb'), delimiter=' ', skipinitialspace=True))
 
-    url = "https://www.virustotal.com/vtapi/v2/file/report"
-    parameters = {"resource": server.resource,
-                  "apikey": "bbcbdebbe6503a2efb02553ffc4a07d9f0d338ae314c70b3556ad0573221545c"}
-    data = urllib.urlencode(parameters)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    jsona = response.read()
-    vt = json.loads(jsona)
-    if vt['response_code'] <> 1:
-      print "ERROR - Virus Total API returned bad response_code"
+    #send hashes to VirusTotal and get results
+    file_to_send = open(server.vtfile, "rb").read()
+    csv_format = file_to_send.replace("\n",",").strip()
+    params = {'apikey':  server.vtkey, 'resource': csv_format}
+    response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params)
+    vt = response.json()
+#    print json.dumps(vt, indent = 2)
 
-#    print server.name
-#    print server.resource
-    print json.dumps(vt, indent = 2)
-#    print vt['scans']
-    print vt['response_code']
-    print vt['positives']
-    server.infected = []
-    try:
-       if vt['positives'] > 0:
-           infected = infected + 1
-           server.infected.append( vt['resource'] )
-       else:
-           unknown = unknown + 1 #how to tell safe from unknown?
-    except:
-           print("error in cruncher.get_server_fim_stats")
-    print server.infected
-#### NOTE - this scan might be only for the 1st hash?  or all hashes for that server?  figure this out@@@
-    infected = vt['positives']
-    safe = vt['total'] - vt['positives']
+    #process output of VirusTotal
+    for i in range( 0, len(vt) ):
+#        print vt[i]['response_code']
+        if vt[i]['response_code'] == 1:
+#            print vt[i]['positives']
+            try:
+                if vt[i]['positives'] > 0:
+                    infected = infected + 1
+                    server.infected.append( vt[i]['resource'] )
+                else:
+                    unknown = unknown + 1 #how to tell safe from unknown?
+            except:
+                print("error in cruncher.get_server_fim_stats")
+
+    print len(server.infected)
+
+    infected = len(server.infected)
+    safe = len(vt) - infected
     unknown = 1  #not sure how to set this field
 
     retval = {'known_virus':infected, 
