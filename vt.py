@@ -45,7 +45,8 @@ def main(argv):
         #Drill down through the JSON to get to the hashes, if they exist
         total_objects = s.issues['baseline']['details']['total_objects']
         targets = s.issues['baseline']['details']['targets']#['objects']['contents']
-        #print json.dumps( targets, sort_keys=True, indent=2)
+        print "here be hashes:"
+        print json.dumps( targets, sort_keys=True, indent=2)
         for objects in targets:
 #            print json.dumps(objects, sort_keys=True, indent=4)
             if objects  is None:
@@ -64,21 +65,22 @@ def main(argv):
                              #print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
                              
                              # Print hashes, culling out &hellip and @.
-                             hash = object[0]['contents']
+                             hash = object[i]['contents']
                              if "..." not in hash and "at" not in hash:
-                                 wamfile.write(str(s.name) + ", " + str(object[0]['filename']) + ", " + str(hash) + "\n")
+                                 wamfile.write(str(s.name) + ", " + str(object[i]['filename']) + ", " + str(hash) + "\n")
                                  vtfile.write(hash + "\n")
-                                 s.vt.update( { str(object[0]['filename']) : str(hash) } ) #match filenames to hashes
+                                 s.vt.update( { str(object[i]['filename']) : str(hash) } ) #match filenames to hashes
         vtfile.close() #input to VirusTotal
         wamfile.close()#same as vtfile plus extra data needed for WAM report
-
-# THIS CODE WORKS
+        print "hi8"
+        print s.vt
+        print "hi8"
+# THIS CODE WORKS - but moved the API call to cruncher.py
 #        file_to_send = open("hashes" + str(filenum) + ".txt", "rb").read()
 #        csv_format = file_to_send.replace("\n",",").strip()
 #        params = {'apikey':  config['virus_total_key'], 'resource': csv_format}
 #        response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params)
 #        vt_out = response.json()
-
 #        print s.vt
 #        print json.dumps(vt_out, indent=2)
 
