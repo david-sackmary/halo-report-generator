@@ -6,7 +6,7 @@ import sys
 import dumper
 import json
 import subprocess
-import postfile   # used by VirusTotal API
+import requests  # used by VirusTotal API
 
 def main(argv):
     config = {}
@@ -33,6 +33,9 @@ def main(argv):
         # and create a file of filename/hashes for our report.
         vtfile = open("hashes" + str(filenum) + ".txt","w")
         wamfile = open("wam" + str(filenum) + ".txt","w")
+
+        s.vtfile = "hashes" + str(filenum) + ".txt"  #associate filename with this server for later
+        s.vtkey = config['virus_total_key']
 
         #for each server, create a dictionary of filenames and  hashes to send to VirusTotal (up to 25 maximum)
         s.vt = {}
@@ -65,47 +68,22 @@ def main(argv):
                              if "..." not in hash and "at" not in hash:
                                  wamfile.write(str(s.name) + ", " + str(object[0]['filename']) + ", " + str(hash) + "\n")
                                  vtfile.write(hash + "\n")
-#                                 file = str(object[0]['filename'])
-#                                 s.vt.update( { file : str(hash) } ) #match filenames to hashes
                                  s.vt.update( { str(object[0]['filename']) : str(hash) } ) #match filenames to hashes
         vtfile.close() #input to VirusTotal
         wamfile.close()#same as vtfile plus extra data needed for WAM report
 
-        #send the file of hashes for this server to VirusTotal. 
-        #save the 'resource' field to get results later
-        host = "www.virustotal.com"
-        selector = "https://www.virustotal.com/vtapi/v2/file/report"
-        fields = [("apikey", config['virus_total_key'])]
-        file_to_send = open("hashes" + str(filenum) + ".txt", "rb").read()
-        files = [("file", "hashes" + str(filenum) + ".txt", file_to_send)]
-        print files 
-        vt_out = postfile.post_multipart(host, selector, fields, files)
-        try:
-            vt = json.loads( vt_out )
-        except ValueError:
-            print "Cannot decode VirusTotal server response:"
-            print vt
-            exit()
+# THIS CODE WORKS
+#        file_to_send = open("hashes" + str(filenum) + ".txt", "rb").read()
+#        csv_format = file_to_send.replace("\n",",").strip()
+#        params = {'apikey':  config['virus_total_key'], 'resource': csv_format}
+#        response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params)
+#        vt_out = response.json()
 
-        print "hi"
-        print vt
-        if vt["response_code"] == '1':
-            s.resource = vt["resource"]
-        else:
-            print("VirusTotal response_code was %d\n", vt["response_code"])
-            print("I'm skipping this file, and there's going to be an error")
-            s.resource = None
+#        print s.vt
+#        print json.dumps(vt_out, indent=2)
 
         #increment filenum for the next iteration through the loop
         filenum = filenum + 1
-
-        #HERE we need to put the contents of 'wamfile' and 'a' and put into 'serverolist'
-        # ...but instead I'm writing out to files, then reading them again inside 'handle_output'
-        #TO DO this right, use the call below. put output 'a' into serverolist somehow.
-        # a = subprocess.Popen("uirusu -f hashes.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
-        # print a
-        # the above subprocess call works, but so does this:
-        #subprocess.Popen("uirusu -f hashes.txt > vt.txt", stdout=subprocess.PIPE, shell=True).stdout.read()
 
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':

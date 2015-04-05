@@ -54,7 +54,9 @@ def build_server_list(host, authtoken, srch, field, prox):
 def enrich_server_data(host, authtoken, slist, prox):
     returned_dataz = []
     for s in slist:
-        s.issues = get_server_fim(host, authtoken, s.id, prox)
+#        s.issues = get_server_issues(host, authtoken, s.id, prox) #restore Ash's call when testing is complete
+        s.fim_baseline = get_server_fim_baseline(host, authtoken, s.id, prox)
+        s.fim_scan = get_server_fim_scan(host, authtoken, s.id, prox)
         returned_dataz.append(s)
     return(returned_dataz)
 
@@ -75,14 +77,28 @@ def get_server_issues(host,authtoken,node_id,prox):
     results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
     return(results)
 
+#def get_server_fim_scan(host,authtoken,node_id,prox):
+# Follow Ryan's advice:
+#{"resource":"scan","field":"id","value":"eb0f0e40bb490132129906d1dfa3ebe3"}
+#    queryurl = '/v1/servers/'   #this call reveals the line below:
+#    queryurl = '/v1/servers/756db610b7a20132300d3c764e10a2a9/fim/'
+#    results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
+#    pretty = json.dumps( results, sort_keys=True, indent=2)
+#    print pretty
+#    return(results)
 
-def get_server_fim(host,authtoken,node_id,prox):
+
+def get_server_fim_baseline(host,authtoken,node_id,prox):
 #    for each baseline...
 #    queryurl = '/v1/fim_policies'     #this gets you the id below, then add /baselines to get the next id below
 #    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/'
-#    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/fc0227207b640132a87e3c764e10c221/details'
-
-    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/3263af60bafb0132077f3c764e108057/details'
+    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/fc0227207b640132a87e3c764e10c221/details' #clean baseline
+    results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
+    return(results)
+    
+def get_server_fim_scan(host,authtoken,node_id,prox):
+#    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/3263af60bafb0132077f3c764e108057/details' #poisonivy included
+    queryurl = '/v1/fim_policies/ee31c8007b640132a87e3c764e10c221/baselines/3263af60bafb0132077f3c764e108057/details' #get hashes from 'scan' FIX LATER
     results = api.apihit(host, 'GET', authtoken, queryurl, '', prox)
 #    pretty = json.dumps( results, sort_keys=True, indent=2)
 #    print pretty

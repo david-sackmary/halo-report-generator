@@ -142,7 +142,7 @@ def generate_server_content(s):
     mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(fim_stats['known_virus']) + '\n* Good: ' + str(fim_stats['known_safe']) + '\n* Unknown: ' + str(fim_stats['unknown'])
     mdown_sva = mdown_sva + '\n\n###Software Vulnerability Assessment Summary:\n* Critical: ' + str(sva_stats['critical']) + '\n* Non-critical: ' + str(sva_stats['non_critical'])
     mdown_csm = mdown_csm + str(md_render_csm(issues))
-    mdown_fim = mdown_fim + str(md_render_fim(issues))
+    mdown_fim = mdown_fim + str(md_render_fim(s))
     mdown_sva = mdown_sva + str(md_render_sva(issues))
     return(mdown_server, mdown_csm, mdown_fim, mdown_sva)
 
@@ -162,25 +162,24 @@ def md_render_csm(i):
         ret_md = ret_md + '<tr><td style="color:red;">NO CONFIGURATION ASSESSMENT RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)
 
-def md_render_fim(i):
+# md_render_fim inputs a server which has already been processed by a FIM scan and results from VirusTotal, and outputs salient results.
+def md_render_fim(s):
     ret_md = ''
     ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>File</td><td>Hash</td><td>Infection</td></tr>"
 
-#DAVE KNOWS
-#open file here and fill in values for the tables
-#or maybe values were filled in by get_server_fim_stats
-    try:
-        for issue in i['fim']['findings']:
-            if issue['status'] == 'bad':
-                cvelist = []
-                for entry in issue['cve_entries']:
-                    if entry['suppressed'] == False:
-                        cvelist.append(entry['cve_entry'])
-                cve_enriched = fn.enrich_cve_list(cvelist)
-                cve_html = fn.cve_e_to_html(cve_enriched)
-                ret_md = ret_md + '<tr><td>' + str(issue['package_name']) + '</td><td>' + str(issue['package_version']) + '</td><td>' + str(issue['critical']) + '</td><td>' + cve_html + '</td></tr>'
-        ret_md = ret_md + "</table>\n\n---\n"
-    except:
+    #DAVE KNOWS:  values were filled in by cruncher.get_server_fim_stats
+    print "in md_render_Fim"
+    print s.infected
+
+    #Find filenames for hashes which VirutTotal marked as infected
+#    print s.vt
+    if len(s.infected) > 0:   #find the filename which matches the infected hash
+        for i in s.infected:
+            for x in s.scan_hashes:
+                if i == s.scan_hashes[x]:
+                    ret_md = ret_md + '<tr><td>' + str(x) + '</td><td>' + str(i) + '</td><td>' + "poisonivy" + '</td></tr>'
+                    ret_md = ret_md + "</table>\n\n---\n"
+    else:
         ret_md = ret_md + '<tr><td style="color:red;">NO INFECTIONS FOUND</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)
 

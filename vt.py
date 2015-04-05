@@ -3,10 +3,104 @@
 import api
 import fn
 import sys
+import cruncher
 import dumper
 import json
 import subprocess
 import requests  # used by VirusTotal API
+
+def get_new_hashes_since_baseline( baseline_hashes, scan_hashes):
+    #for each server, create a dictionary of filenames and  hashes to send to VirusTotal (up to 25 maximum)
+    vt_hashes = {}
+
+#    for sh in len(scan_hashes):
+#        for bh in len(baseline_hashes):
+#            print "scan hash = " + str(sh)
+    return(vt_hashes)
+
+def get_server_baseline_hashes(config, s, filenum):     #for FIM-> VirusTotal, aka whack-a-mole
+
+    s.vtfile = "hashes" + str(filenum) + ".txt"  #associate filename with this server for later
+    s.vtkey = config['virus_total_key']
+
+    #for each server, create a dictionary of filenames and  hashes to send to VirusTotal (up to 25 maximum)
+    baseline_hashes = {}
+
+    #filenum increments at bottom of loop
+
+    #Drill down through the JSON to get to the hashes, if they exist
+    total_objects = s.fim_baseline['baseline']['details']['total_objects']
+    targets = s.fim_baseline['baseline']['details']['targets']#['objects']['contents']
+#    print "here be hashes:"
+#    print json.dumps( targets, sort_keys=True, indent=2)
+    for objects in targets:
+#        print json.dumps(objects, sort_keys=True, indent=4)
+        if objects  is None:
+            print "no objects"
+        else:
+            number_of_objects = objects['number_of_objects']
+#            print number_of_objects
+            if number_of_objects > 0:
+                object = objects['objects']
+#                print json.dumps(objects['objects'], sort_keys=True, indent=4)
+                for i in range(number_of_objects):
+                    if object is None:
+                        print "no contents"
+                    else:
+#                        print json.dumps(object, sort_keys=True, indent=4)
+                         #print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
+
+                         # Print hashes, culling out &hellip and @.
+                         hash = object[i]['contents']
+                         if "..." not in hash and "at" not in hash:
+                             #wamfile.write(str(s.name) + ", " + str(object[i]['filename']) + ", " + str(hash) + "\n")
+                             #vtfile.write(hash + "\n")
+                             baseline_hashes.update( { str(object[i]['filename']) : str(hash) } ) #match filenames to hashes
+    #vtfile.close() #input to VirusTotal
+    #wamfile.close()#same as vtfile plus extra data needed for WAM report
+    return (baseline_hashes)
+
+def get_server_scan_hashes(config, s, filenum):     #for FIM-> VirusTotal, aka whack-a-mole
+
+    s.vtfile = "hashes" + str(filenum) + ".txt"  #associate filename with this server for later
+    s.vtkey = config['virus_total_key']
+
+    #for each server, create a dictionary of filenames and  hashes to send to VirusTotal (up to 25 maximum)
+    baseline_hashes = {}
+
+    #filenum increments at bottom of loop
+
+    #Drill down through the JSON to get to the hashes, if they exist
+    total_objects = s.fim_scan['baseline']['details']['total_objects']
+    targets = s.fim_scan['baseline']['details']['targets']#['objects']['contents']
+#    print "here be hashes:"
+#    print json.dumps( targets, sort_keys=True, indent=2)
+    for objects in targets:
+#        print json.dumps(objects, sort_keys=True, indent=4)
+        if objects  is None:
+            print "no objects"
+        else:
+            number_of_objects = objects['number_of_objects']
+#            print number_of_objects
+            if number_of_objects > 0:
+                object = objects['objects']
+#                print json.dumps(objects['objects'], sort_keys=True, indent=4)
+                for i in range(number_of_objects):
+                    if object is None:
+                        print "no contents"
+                    else:
+#                        print json.dumps(object, sort_keys=True, indent=4)
+                         #print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
+
+                         # Print hashes, culling out &hellip and @.
+                         hash = object[i]['contents']
+                         if "..." not in hash and "at" not in hash:
+                             #wamfile.write(str(s.name) + ", " + str(object[i]['filename']) + ", " + str(hash) + "\n")
+                             #vtfile.write(hash + "\n")
+                             baseline_hashes.update( { str(object[i]['filename']) : str(hash) } ) #match filenames to hashes
+    #vtfile.close() #input to VirusTotal
+    #wamfile.close()#same as vtfile plus extra data needed for WAM report
+    return (baseline_hashes)
 
 def main(argv):
     config = {}
@@ -26,66 +120,26 @@ def main(argv):
     serverolist = fn.build_server_list(config['host'], config['authtoken'], config['search_string'], config['search_field'], config['prox'])
     serverolist = fn.enrich_server_data(config['host'], config['authtoken'], serverolist, config['prox'])
 
-    #dump here for whack-a-mole
     filenum = 0
     for s in serverolist:
-        #for each server, create a file of hashes to send to VirusTotal
-        # and create a file of filename/hashes for our report.
-        vtfile = open("hashes" + str(filenum) + ".txt","w")
-        wamfile = open("wam" + str(filenum) + ".txt","w")
-
-        s.vtfile = "hashes" + str(filenum) + ".txt"  #associate filename with this server for later
-        s.vtkey = config['virus_total_key']
-
-        #for each server, create a dictionary of filenames and  hashes to send to VirusTotal (up to 25 maximum)
-        s.vt = {}
-
-        #filenum increments at bottom of loop
-
-        #Drill down through the JSON to get to the hashes, if they exist
-        total_objects = s.issues['baseline']['details']['total_objects']
-        targets = s.issues['baseline']['details']['targets']#['objects']['contents']
-        print "here be hashes:"
-        print json.dumps( targets, sort_keys=True, indent=2)
-        for objects in targets:
-#            print json.dumps(objects, sort_keys=True, indent=4)
-            if objects  is None:
-                print "no objects"
+        s.new_hashes = {}
+        s.baseline_hashes = get_server_baseline_hashes(config, s, filenum)
+#        print "baseline_hashes:"
+#        print baseline_hashes
+#        print "\nscan_hashes:"
+        s.scan_hashes = get_server_scan_hashes(config, s, filenum)
+#        print scan_hashes
+        print "\nhashes in scan that are not in baseline or have changed since baseline:"
+        for x in s.scan_hashes:
+            if x not in s.baseline_hashes:
+                s.new_hashes.update( { x : s.scan_hashes[x] + ","} ) #match filenames to hashes
             else:
-                number_of_objects = objects['number_of_objects']
-#                print number_of_objects
-                if number_of_objects > 0:
-                    object = objects['objects']
-#                    print json.dumps(objects['objects'], sort_keys=True, indent=4)
-                    for i in range(number_of_objects):
-                        if object is None:
-                            print "no contents"
-                        else:
-#                            print json.dumps(object, sort_keys=True, indent=4)
-                             #print json.dumps(object[0]['contents'], sort_keys=True, indent=4)
-                             
-                             # Print hashes, culling out &hellip and @.
-                             hash = object[i]['contents']
-                             if "..." not in hash and "at" not in hash:
-                                 wamfile.write(str(s.name) + ", " + str(object[i]['filename']) + ", " + str(hash) + "\n")
-                                 vtfile.write(hash + "\n")
-                                 s.vt.update( { str(object[i]['filename']) : str(hash) } ) #match filenames to hashes
-        vtfile.close() #input to VirusTotal
-        wamfile.close()#same as vtfile plus extra data needed for WAM report
-        print "hi8"
-        print s.vt
-        print "hi8"
-# THIS CODE WORKS - but moved the API call to cruncher.py
-#        file_to_send = open("hashes" + str(filenum) + ".txt", "rb").read()
-#        csv_format = file_to_send.replace("\n",",").strip()
-#        params = {'apikey':  config['virus_total_key'], 'resource': csv_format}
-#        response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params)
-#        vt_out = response.json()
-#        print s.vt
-#        print json.dumps(vt_out, indent=2)
-
-        #increment filenum for the next iteration through the loop
-        filenum = filenum + 1
+                for y in s.baseline_hashes:
+                    if x == y and s.scan_hashes[x] != s.baseline_hashes[y]:
+                        s.new_hashes.update( { x : s.scan_hashes[x] } ) #match filenames to hashes
+        print s.new_hashes
+        print "-------------------------------------------"
+        print "fix case where only 1 result, and fix final comma if need be"
 
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':

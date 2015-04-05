@@ -5,7 +5,6 @@ import json
 import urllib
 import urllib2
 import requests
-
 from operator import itemgetter
 from collections import OrderedDict
 
@@ -34,40 +33,49 @@ def get_server_csm_stats(server):
     return(retval)
 
 def get_server_fim_stats(server):
-    virus = 0
+    infected = 0
     safe = 0
     unknown = 0
     config = {}
     server.infected = []
     server.positives = 0
 
-    #wamfile = open("wam.txt","w")
-    #server_list = list(csv.reader(open("wam.txt", 'rb'), delimiter=', ', skipinitialspace=True))
+    #send hashes to VirusTotal and get results   #OLD Code.  useful if opening files instead.
+#    file_to_send = open(server.vtfile, "rb").read()
+#    csv_format = file_to_send.replace("\n",",").strip()
+#    params = {'apikey':  server.vtkey, 'resource': csv_format}
+#    print params
+#    print server.vtfile
 
     #send hashes to VirusTotal and get results
-    file_to_send = open(server.vtfile, "rb").read()
-    csv_format = file_to_send.replace("\n",",").strip()
-    params = {'apikey':  server.vtkey, 'resource': csv_format}
+    vt_hashes = ""
+    for x in server.new_hashes:
+        vt_hashes = vt_hashes + server.new_hashes[x]
+    print vt_hashes
+      
+    params = {'apikey':  server.vtkey, 'resource': vt_hashes}
+
     response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params)
     vt = response.json()
+#    print "in cruncher, before vt results:"
 #    print json.dumps(vt, indent = 2)
+#    print "after vt results"
 
-    #process output of VirusTotal
+    #process output of VirusTotal; seek positives and add infected hashes to the list
     for i in range( 0, len(vt) ):
-#        print vt[i]['response_code']
         if vt[i]['response_code'] == 1:
-#            print vt[i]['positives']
             try:
-                if vt[i]['positives'] > 0:
-                    infected = infected + 1
+                if vt[i]['positives'] > 0:   
+#                    print "infected file found"
                     server.infected.append( vt[i]['resource'] )
                 else:
                     unknown = unknown + 1 #how to tell safe from unknown?
             except:
                 print("error in cruncher.get_server_fim_stats")
+#    print "num infected:"
+#    print len(server.infected)
 
-    print len(server.infected)
-
+    server.vt = vt   #safe results from VirusTotal for output
     infected = len(server.infected)
     safe = len(vt) - infected
     unknown = 1  #not sure how to set this field
@@ -137,5 +145,3 @@ def all_server_stats(servers):
     for u_ncpkg in noncrit_pkgs_consolidated:
         retval_noncrit_pkg[str(u_ncpkg)] = all_noncrit_pkgs.count(str(u_ncpkg))
     return(retval_cve, retval_noncrit_pkg, retval_crit_pkg)
-
-
