@@ -3,9 +3,6 @@ Whack-A-Mole
 
 Generate Virus Total reports for FIM Halo modules
 
-###Dependency:
-+ **Uirusu**   git this too:  https://github.com/arxopia/uirusu
-
 ###Files:
 * **README.md**   The one you're reading now...
 * **api.py**   The last stop before crossing the interwebs
@@ -17,12 +14,11 @@ Generate Virus Total reports for FIM Halo modules
 * **license.txt**   The cure for insomnia
 * **outfiles/**   Output files get dropped here
 * **server.py**   Server object definition
-* **wam.py**   Accepts -s SearchString or -a for all.  Optionally declare another config file with -c
-* **wam.sh**   RUN THIS ONE.
+* **vt.py**   RUN THIS ONE.  Accepts -s SearchString or -a for all.  Optionally declare another config file with -c
 
 ###Usage:
 
->wam.sh (-s SEARCHPREFIX|-a) [-c CONFIGFILE]
+>vt.py (-s SEARCHPREFIX|-a) [-c CONFIGFILE]
 
 >This script generates a report for all servers if -a is used, or just the servers with SEARCHPREFIX in the server label if -s is used.
 
