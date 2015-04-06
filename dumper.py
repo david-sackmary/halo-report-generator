@@ -139,7 +139,8 @@ def generate_server_content(s):
     sva_stats = cruncher.get_server_sva_stats(s)
     mdown_server = mdown_server + '\n\n##Host Name: ' + str(servername) + '\n\n###Label: ' + str(serverlabel) + '\n\n###Group: ' + str(s.group_name)
     mdown_csm = mdown_csm + '\n\n###Configuration Compliance Summary:\n* Good: ' + str(csm_stats['good']) + '\n* Bad: ' + str(csm_stats['bad']) + '\n* Indeterminate: ' + str(csm_stats['indeterminate'])
-    mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(fim_stats['known_virus']) + '\n* Good: ' + str(fim_stats['known_safe']) + '\n* Unknown: ' + str(fim_stats['unknown'])
+#    mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(fim_stats['known_virus']) + '\n* Good: ' + str(fim_stats['known_safe']) + '\n* Unknown: ' + str(fim_stats['unknown'])
+    mdown_fim = mdown_fim + '\n\n###VirusTotal Summary:\n* Infected: ' + str(fim_stats['known_virus'])
     mdown_sva = mdown_sva + '\n\n###Software Vulnerability Assessment Summary:\n* Critical: ' + str(sva_stats['critical']) + '\n* Non-critical: ' + str(sva_stats['non_critical'])
     mdown_csm = mdown_csm + str(md_render_csm(issues))
     mdown_fim = mdown_fim + str(md_render_fim(s))
@@ -162,23 +163,27 @@ def md_render_csm(i):
         ret_md = ret_md + '<tr><td style="color:red;">NO CONFIGURATION ASSESSMENT RESULTS AVAILABLE</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)
 
-# md_render_fim inputs a server which has already been processed by a FIM scan and results from VirusTotal, and outputs salient results.
+# md_render_fim inputs a server which has already been processed by a FIM scan w/ results from VirusTotal, and outputs salient results to a file in /outfiles.
+# (DAVE KNOWS:  salient server values were filled in by cruncher.get_server_fim_stats)
 def md_render_fim(s):
     ret_md = ''
-    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>File</td><td>Hash</td><td>Infection</td></tr>"
-
-    #DAVE KNOWS:  values were filled in by cruncher.get_server_fim_stats
-    print "in md_render_Fim"
-    print s.infected
+    ret_md = ret_md + "\n\n###File Integrity:\n\n<table><tr><td>Server</td><td>File</td><td>Hash</td><td>Virus Total </td></tr>"
 
     #Find filenames for hashes which VirutTotal marked as infected
-#    print s.vt
-    if len(s.infected) > 0:   #find the filename which matches the infected hash
+    if len(s.infected) > 0:
         for i in s.infected:
-            for x in s.scan_hashes:
-                if i == s.scan_hashes[x]:
-                    ret_md = ret_md + '<tr><td>' + str(x) + '</td><td>' + str(i) + '</td><td>' + "poisonivy" + '</td></tr>'
-                    ret_md = ret_md + "</table>\n\n---\n"
+            for x in s.vt:   #s.vt contains results from VirusTotal
+                if i == x['resource']:  #we found a hash which matches the infected hash, now we create a file with the VirusTotal results
+                    vtfilename = str(i) +'.txt'
+                    vtfile = open( './outfiles/' + vtfilename, 'w+b')
+                    pretty = json.dumps(x, indent=2)
+                    vtfile.write(pretty)
+                    vtfile.close()
+            for x in s.scan_hashes: 
+                if i == s.scan_hashes[x]:  #we found a hash which matches the infected hash, now we know the filename
+                    ret_md = ret_md + '<tr><td>' + s.name + '</td><td>' + str(x) + '</td><td>' + str(i) + '</td><td><a href=' + vtfilename + '>INFECTED</a></td></tr>'
+            
+        ret_md = ret_md + "</table>\n\n---\n"
     else:
         ret_md = ret_md + '<tr><td style="color:red;">NO INFECTIONS FOUND</td><td></td><td></td><td></td><td></td></table>'
     return(ret_md)

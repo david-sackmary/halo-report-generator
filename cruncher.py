@@ -51,15 +51,15 @@ def get_server_fim_stats(server):
     vt_hashes = ""
     for x in server.new_hashes:
         vt_hashes = vt_hashes + server.new_hashes[x]
-    print vt_hashes
+#    print vt_hashes
       
     params = {'apikey':  server.vtkey, 'resource': vt_hashes}
 
     response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params)
     vt = response.json()
-#    print "in cruncher, before vt results:"
+#    print "in cruncher, printing vt results:"
 #    print json.dumps(vt, indent = 2)
-#    print "after vt results"
+#    print "after print of vt results"
 
     #process output of VirusTotal; seek positives and add infected hashes to the list
     for i in range( 0, len(vt) ):
@@ -72,14 +72,15 @@ def get_server_fim_stats(server):
                     unknown = unknown + 1 #how to tell safe from unknown?
             except:
                 print("error in cruncher.get_server_fim_stats")
+
 #    print "num infected:"
 #    print len(server.infected)
 
-    server.vt = vt   #safe results from VirusTotal for output
+    server.vt = vt   #all results from VirusTotal for output
     infected = len(server.infected)
+    server.infected = OrderedDict.fromkeys(server.infected) #remove duplicate hashes
     safe = len(vt) - infected
     unknown = 1  #not sure how to set this field
-
     retval = {'known_virus':infected, 
               'known_safe':safe,
               'unknown':unknown}

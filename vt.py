@@ -124,10 +124,10 @@ def main(argv):
     for s in serverolist:
         s.new_hashes = {}
         s.baseline_hashes = get_server_baseline_hashes(config, s, filenum)
+        s.scan_hashes = get_server_scan_hashes(config, s, filenum)
 #        print "baseline_hashes:"
 #        print baseline_hashes
 #        print "\nscan_hashes:"
-        s.scan_hashes = get_server_scan_hashes(config, s, filenum)
 #        print scan_hashes
         print "\nhashes in scan that are not in baseline or have changed since baseline:"
         for x in s.scan_hashes:
@@ -139,7 +139,7 @@ def main(argv):
                         s.new_hashes.update( { x : s.scan_hashes[x] } ) #match filenames to hashes
         print s.new_hashes
         print "-------------------------------------------"
-        print "fix case where only 1 result, and fix final comma if need be"
+        print "FIX the case where only 1 result"
 
 # Here we re-write the config if the logo file is on the local filesystem, because relative paths don't work well with PDF rendering.
     if fn.where_is_img(config['logo_url'])[0] == 'local' and config['output'] == 'pdf':
